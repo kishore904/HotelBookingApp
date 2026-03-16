@@ -1,13 +1,14 @@
 /**
  * -------------------------------------------------------
  * Hotel Booking Management System
- * Use Case 7: Add-On Service Selection
+ * Use Case 8: Booking History & Reporting
  *
- * This program allows optional services to be attached
- * to a reservation without modifying core booking logic.
+ * This program records confirmed reservations and allows
+ * administrators to view booking history and generate
+ * simple reports.
  *
  * @author Kishore
- * @version 7.0
+ * @version 8.0
  * -------------------------------------------------------
  */
 
@@ -20,10 +21,12 @@ class Reservation {
 
     private String reservationId;
     private String guestName;
+    private String roomType;
 
-    public Reservation(String reservationId, String guestName) {
+    public Reservation(String reservationId, String guestName, String roomType) {
         this.reservationId = reservationId;
         this.guestName = guestName;
+        this.roomType = roomType;
     }
 
     public String getReservationId() {
@@ -33,67 +36,51 @@ class Reservation {
     public String getGuestName() {
         return guestName;
     }
-}
 
-// -------------------------------------------------------
-// Add-On Service Class
-// -------------------------------------------------------
-class AddOnService {
-
-    private String serviceName;
-    private double price;
-
-    public AddOnService(String serviceName, double price) {
-        this.serviceName = serviceName;
-        this.price = price;
+    public String getRoomType() {
+        return roomType;
     }
 
-    public double getPrice() {
-        return price;
-    }
-
-    public String getServiceName() {
-        return serviceName;
+    public void display() {
+        System.out.println("Reservation ID: " + reservationId +
+                " | Guest: " + guestName +
+                " | Room: " + roomType);
     }
 }
 
 // -------------------------------------------------------
-// Add-On Service Manager
+// Booking History
 // -------------------------------------------------------
-class AddOnServiceManager {
+class BookingHistory {
 
-    // ReservationID → List of Services
-    private Map<String, List<AddOnService>> reservationServices = new HashMap<>();
+    // List preserves insertion order
+    private List<Reservation> bookingList = new ArrayList<>();
 
-    // Add service to reservation
-    public void addService(String reservationId, AddOnService service) {
-
-        reservationServices.putIfAbsent(reservationId, new ArrayList<>());
-        reservationServices.get(reservationId).add(service);
-
-        System.out.println("Service added: " + service.getServiceName());
+    public void addReservation(Reservation reservation) {
+        bookingList.add(reservation);
+        System.out.println("Reservation stored: " + reservation.getReservationId());
     }
 
-    // Display services for reservation
-    public void displayServices(String reservationId) {
+    public List<Reservation> getBookings() {
+        return bookingList;
+    }
+}
 
-        System.out.println("\nSelected Services for Reservation: " + reservationId);
+// -------------------------------------------------------
+// Booking Report Service
+// -------------------------------------------------------
+class BookingReportService {
 
-        List<AddOnService> services = reservationServices.get(reservationId);
+    public void generateReport(List<Reservation> bookings) {
 
-        if (services == null) {
-            System.out.println("No services selected.");
-            return;
+        System.out.println("\n===== Booking History Report =====");
+
+        for (Reservation r : bookings) {
+            r.display();
         }
 
-        double totalCost = 0;
-
-        for (AddOnService s : services) {
-            System.out.println("- " + s.getServiceName() + " ($" + s.getPrice() + ")");
-            totalCost += s.getPrice();
-        }
-
-        System.out.println("Total Add-On Cost: $" + totalCost);
+        System.out.println("\nTotal Reservations: " + bookings.size());
+        System.out.println("==================================");
     }
 }
 
@@ -106,26 +93,18 @@ public class HotelBookingApp {
 
         System.out.println("======================================");
         System.out.println(" HOTEL BOOKING MANAGEMENT SYSTEM");
-        System.out.println(" Version 7.0 - Add-On Services");
+        System.out.println(" Version 8.0 - Booking History");
         System.out.println("======================================");
 
-        // Example reservation
-        Reservation reservation = new Reservation("RES-101", "Alice");
+        BookingHistory history = new BookingHistory();
 
-        // Create service manager
-        AddOnServiceManager manager = new AddOnServiceManager();
+        // Simulating confirmed reservations
+        history.addReservation(new Reservation("RES-101", "Alice", "Single Room"));
+        history.addReservation(new Reservation("RES-102", "Bob", "Double Room"));
+        history.addReservation(new Reservation("RES-103", "Charlie", "Suite Room"));
 
-        // Guest selects services
-        manager.addService(reservation.getReservationId(),
-                new AddOnService("Breakfast", 20));
-
-        manager.addService(reservation.getReservationId(),
-                new AddOnService("Airport Pickup", 50));
-
-        manager.addService(reservation.getReservationId(),
-                new AddOnService("Spa Access", 35));
-
-        // Display services and cost
-        manager.displayServices(reservation.getReservationId());
+        // Admin generates report
+        BookingReportService reportService = new BookingReportService();
+        reportService.generateReport(history.getBookings());
     }
 }
